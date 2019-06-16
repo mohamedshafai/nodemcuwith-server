@@ -1,0 +1,66 @@
+// this code created by muhamed elshafai
+// visit our site for more www.3asrel3elm.com
+
+
+#include <ESP8266WiFi.h>
+const char* ssid = "tedata";
+const char* password = "@me";
+WiFiServer server(80); 
+float  sensor1 ;
+//WiFiClient client ;
+void setup() {
+Serial.begin(115200);
+
+Serial.println();
+Serial.print("Connecting to ");
+Serial.println(ssid);
+WiFi.begin(ssid, password);
+while (WiFi.status() != WL_CONNECTED) {
+delay(500);
+Serial.print(".");
+}
+Serial.println("");
+Serial.println("WiFi connected");
+Serial.println("IP address: ");
+server.begin();
+Serial.println(WiFi.localIP());
+pinMode(D2,OUTPUT);
+
+}
+
+void loop(){
+  
+  WiFiClient zebon = server.available();
+
+if(!zebon){
+  return ;
+}
+Serial.print("Connecting to zebon ");
+
+ String req = zebon.readStringUntil('\n');
+zebon.flush();
+
+//Serial.println(req.indexOf("gpio/off"));
+if(req.indexOf("gpio/on")!=-1)
+{
+  digitalWrite(D2,HIGH);
+}else if(req.indexOf("gpio/off")!=-1)
+{
+    digitalWrite(D2,LOW);
+
+}
+else if(req.indexOf("gpio1/off")!=-1)
+{
+    digitalWrite(D1,LOW);
+
+}
+sensor1 = analogRead(A0);
+
+ String resp = "HTTP/1.1 200 OK\r\n content-type:text/html\r\n\r\n <!DOCTYPE HTML><HTML> <head> shafai smart home </head><style> a {font-size:50px; color:blue; padding : 20px;}</style><BODY> the ld r reading =  " ;
+        resp+=sensor1;// resp=resp+sensor1
+        resp+= "<a href='/gpio/on'>turn on</a><a href='/gpio1/off'>turn off pin1</a><a href='/gpio/off'>turn off</a> </BODY></HTML>";
+zebon.print(resp);
+delay(100);
+zebon.stop();
+return;
+}
